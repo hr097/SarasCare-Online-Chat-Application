@@ -8,10 +8,10 @@
     <img src="/public/images/saras-care.jpg" alt="Saras Care Logo" width="190" height="200">
   </a>
 
-  <h3 align="center">DTALK</h3>
+  <h3 align="center">Saras Care Chat Application </h3>
 
   <p align="center">
-    A Online Chat Website
+    A Online Chat App for SarasCare Melbourne Diwali Event
     <br />
   </p>
   <a href="https://real-time-chat-balar.herokuapp.com/">View Demo</a>
@@ -20,11 +20,6 @@
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Project ScreenShot
-
-<img src="https://res.cloudinary.com/dexratgkq/image/upload/v1661598778/samples/ss1_nnylvj.png">
-<img src="https://res.cloudinary.com/dexratgkq/image/upload/v1661598872/samples/ss2_yznoes.png">
 
 ## Built With
 
