@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="/public/images/saras-care.jpg" alt="Saras Care Logo" width="190" height="100">
+    <img src="/public/images/saras-care.jpg" alt="Saras Care Logo" width="190" height="200">
   </a>
 
   <h3 align="center">DTALK</h3>
