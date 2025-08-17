@@ -8,10 +8,10 @@
     <img src="/public/images/saras-care.jpg" alt="Saras Care Logo" width="190" height="200">
   </a>
 
-  <h3 align="center">Saras Care Chat Application </h3>
+  <h3 align="center">Saras Care Attendance Management Application </h3>
 
   <p align="center">
-    A Online Chat App for SarasCare Melbourne Diwali Event
+    A Online Attendance Management App for SarasCare Melbourne Diwali EventProject Group
     <br />
   </p>
   <a href="https://real-time-chat-balar.herokuapp.com/">View Demo</a>
