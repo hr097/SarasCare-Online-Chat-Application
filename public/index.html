@@ -7,29 +7,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/index.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/images/saras-care.jpg">
-    <title>SarasCare - Chat Application</title>
+    <title>SarasCare</title>
+    <style>
+    
+
+    .ac-wrap { position: relative; max-width: 600px; }
+    #ac-emailInput { width: 100%; } /* optional if you named a different id */
+    .ac-dd {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    z-index: 9999;
+    }
+    .ac-dd .item {
+    padding: 10px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+    .ac-label {  display: flex;
+  align-items: center;
+  justify-content: center;}
+    .ac-dd .item:hover, .ac-dd .item.active { background: #f5f6f7; }
+    #button {
+    background-color: rgb(180, 42, 42); 
+    color: rgb(255, 255, 255); 
+    border: 1px solid #000000;
+    }
+
+    #button:hover {
+    background-color:rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    }
+  </style>
 </head>
 <body>
     <div class="intro_container">
         <div class="intro_content intro_row">
             <div class="intro_col">
                 <div class="intro_title">
-                    <center><img style="height:150px;width: 150px;" src="/images/saras-care.jpg" alt="Logo"/> </center>
+                    <center>
+                        <img style="height:150px;width: 150px;" src="/images/saras-care.jpg" alt="Logo"/>
+                        <br><br>
+                        <h2>Welcome to SarasCare</h2>                    
+                    </center>
 
-                   
-                    <span>Let's Start Chating With Team SarasCare</span>
                 </div>
-                <div class="intro_form">
-                    <form action="chat.html" autocomplete="false" method="GET" id="introForm">
-                        <input type="text" name="name" placeholder="Enter Your Name" autofocus required>
-                        <input type="text" name="room" placeholder="Create A Group Chat" >
-                        <div class="divider">
+
+                
+
+                 <div class="intro_form">
+
+                        <div class="ac-wrap">
+                        <h2 class="ac-label">Attendance System</h2>
+                        <input id="emailInput" type="text" placeholder="Select or type your email" autocomplete="off" />
+                        <div id="emailDropdown" class="ac-dd" hidden></div>
                         </div>
-                        <select class="allActiveRooms" name="activeRoom">
-                            <option>-- Join an Active Group --</option>
-                        </select>
-                        <button>Join</button>
-                    </form>
+                        <center><button id="button">Login</button></center>    
+
+
+
+
+
                 </div>
                 
             </div>
@@ -40,20 +86,108 @@
     </div>
 
 
-    <script id="rooms_template" type="text/html">
-        {{#rooms}}
-          <option>{{.}}</option>
-        {{/rooms}}
-    </script>
+    
 
     <script src="socket.io/socket.io.js"></script>
-    <script src="js/getRooms.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        
+    $(function() {
+      // Example: this would come from your database/API
+      let emails = [
+      ];
+        (async function loadUsers() {
+        try {
+            const res = await fetch("/api/users");
+            let users = await res.json();
+          
+            // users.forEach(u => {
+            // emails.push(u.UserEmail);
+            // });
+            // console.log("Loaded emails:", emails);
+
+            //emails = users.filter(e => e.UserEmail && typeof e.UserEmail === "string");
+            emails = users.map(u => u.UserEmail).filter(e => e && typeof e === "string");       // extract email string.filter(e => e && typeof e === "string"); // optional: remove null/undefined
+
+            console.log("Loaded emails:", emails);
+    ;
+        } catch (err) {
+            console.error("Error loading users", err);
+        }
+        }());
+
+        const $input = $("#emailInput");
+        const $dd = $("#emailDropdown");
+
+        // Render dropdown items
+        function render(items) {
+        $dd.empty();
+        if (!items.length) { $dd.attr("hidden", true); return; }
+        // limit results if you like (e.g., items.slice(0, 10))
+        $.each(items, function(_, email) {
+            $("<div>").addClass("item").text(email).appendTo($dd);
+        });
+        $dd.removeAttr("hidden");
+        }
+
+        // Filter as user types (startsWith; change to includes if you want)
+        $input.on("input", function() {
+        const q = $(this).val().trim().toLowerCase();
+        if (!q) { $dd.attr("hidden", true).empty(); return; }
+        const matches = emails.filter(e => e && typeof e === "string" && e.toLowerCase().startsWith(q));
+        render(matches);
+        });
+
+        // Click to select
+        $dd.on("click", ".item", function() {
+        const email = $(this).text();
+        $input.val(email);
+        $dd.attr("hidden", true).empty();
+        // Your verification hook:
+        // $.post("/verify", { email });
+        });
+
+        // Keyboard navigation (optional but useful)
+        $input.on("keydown", function(e) {
+        const $items = $dd.find(".item");
+        if (!$items.length) return;
+
+        let $active = $items.filter(".active");
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            $active = $active.length ? $active.removeClass("active").next() : $items.first();
+            $active.addClass("active")[0].scrollIntoView({ block: "nearest" });
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            $active = $active.length ? $active.removeClass("active").prev() : $items.last();
+            $active.addClass("active")[0].scrollIntoView({ block: "nearest" });
+        } else if (e.key === "Enter") {
+            if ($active.length) {
+            e.preventDefault();
+            $active.click();
+            }
+        } else if (e.key === "Escape") {
+            $dd.attr("hidden", true).empty();
+        }
+        });
+
+        // Hide on blur (small delay so clicks still register)
+        $input.on("blur", function() { setTimeout(() => $dd.attr("hidden", true).empty(), 150); });
+        $input.on("focus", function() {
+        // Re-show if there are matches for current value
+        const q = $input.val().trim().toLowerCase();
+        if (!q) return;
+        const matches = emails.filter(e => e && typeof e === "string" && e.toLowerCase().startsWith(q));
+        render(matches);
+        });
+    });
+
+    </script>
 </body>
 </html>
