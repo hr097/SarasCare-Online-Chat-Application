@@ -97,6 +97,51 @@ app.get("/api/users", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
+// API route to return users data
+app.get("/api/usersdata", async (req, res) => {
+  try {
+    const collection = db.collection("ProjectTeam_Users");
+    const users = await collection.find({}).toArray();
+
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// POST /api/updatedb
+app.post("/api/updatedb", async (req, res) => {
+  try {
+    const { email, datetime, action } = req.body;
+
+    if (!email || !datetime || !action) {
+      return res.status(400).json({ error: "Missing parameters" });
+    }
+
+    const collection = db.collection("ProjectTeam_Users");
+
+    // Example update: push activity into a new field "Logs"
+    const result = await collection.updateOne(
+      { UserEmail: email },
+      {
+        $push: {
+          Logs: { action, datetime }
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // res.json({ success: true, modifiedCount: result.modifiedCount });
+    res.json({ success: true});
+  } catch (err) {
+    console.error("Error updating DB:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 server.listen(port,(err) => {
     if(err){return err;}

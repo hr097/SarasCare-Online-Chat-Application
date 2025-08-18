@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/index.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/images/saras-care.jpg">
-    <title>SarasCare</title>
+    <title>SarasCare-AMS</title>
     <style>
     
 
@@ -36,13 +36,13 @@
   align-items: center;
   justify-content: center;}
     .ac-dd .item:hover, .ac-dd .item.active { background: #f5f6f7; }
-    #button {
+    #button,#button2 {
     background-color: rgb(180, 42, 42); 
     color: rgb(255, 255, 255); 
     border: 1px solid #000000;
     }
 
-    #button:hover {
+    #button:hover,#button2:hover {
     background-color:rgb(255, 255, 255);
     color: rgb(0, 0, 0);
     }
@@ -67,10 +67,13 @@
 
                         <div class="ac-wrap">
                         <h2 class="ac-label">Attendance System</h2>
-                        <input id="emailInput" type="text" placeholder="Select or type your email" autocomplete="off" />
+                        <input id="emailInput" type="text" placeholder="Select or type your email" autocomplete="on" />
                         <div id="emailDropdown" class="ac-dd" hidden></div>
                         </div>
-                        <center><button id="button">Login</button></center>    
+                        <center>
+                            <button  id="button">Sign In</button>
+                            <button  id="button2">Sign Off</button>
+                        </center>    
 
 
 
@@ -88,7 +91,7 @@
 
     
 
-    <script src="socket.io/socket.io.js"></script>
+    <!-- <script src="socket.io/socket.io.js"></script> -->
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
@@ -99,6 +102,49 @@
     <script type="text/javascript">
         
     $(function() {
+
+    // Get cookie
+    function getCookie(name) {
+    let cookieArr = document.cookie.split(";");
+    for (let i = 0; i < cookieArr.length; i++) {
+        let cookiePair = cookieArr[i].trim().split("=");
+        if (cookiePair[0] === name) {
+        return decodeURIComponent(cookiePair[1]);
+        }
+    }
+    return null;
+    }
+
+    // Set cookie
+    function setCookie(name, value) {
+    let date = new Date();
+    date.setTime(date.getTime() + (3600000));
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/`;
+    }
+
+    // Delete cookie
+    function deleteCookie(name) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    }
+
+    
+// Get formatted date-time string (dd-mm-yyyy HH:MM AM/PM)
+function getFormattedDateTime() {
+  const now = new Date();
+
+  let dd = String(now.getDate()).padStart(2, "0");
+  let mm = String(now.getMonth() + 1).padStart(2, "0");
+  let yyyy = now.getFullYear();
+
+  let hours = now.getHours();
+  let minutes = String(now.getMinutes()).padStart(2, "0");
+  let ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+
+  const time = `${hours}:${minutes} ${ampm}`;
+  return `${dd}-${mm}-${yyyy} ${time}`;
+}
+
       // Example: this would come from your database/API
       let emails = [
       ];
@@ -115,8 +161,8 @@
             //emails = users.filter(e => e.UserEmail && typeof e.UserEmail === "string");
             emails = users.map(u => u.UserEmail).filter(e => e && typeof e === "string");       // extract email string.filter(e => e && typeof e === "string"); // optional: remove null/undefined
 
-            console.log("Loaded emails:", emails);
-    ;
+            //console.log("Loaded emails:", emails);
+    
         } catch (err) {
             console.error("Error loading users", err);
         }
@@ -185,6 +231,85 @@
         if (!q) return;
         const matches = emails.filter(e => e && typeof e === "string" && e.toLowerCase().startsWith(q));
         render(matches);
+        });
+
+
+        function updateDatabase(email,action_x)
+        {
+            const datetime = getFormattedDateTime();
+
+            $.ajax({
+                url: "/api/updatedb",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                email: email,
+                datetime: datetime,
+                action: action_x
+                }),
+                success: function(res) {
+                console.log("API response:", res);
+                },
+                error: function(err) {
+                console.error("API error:", err);
+                }
+            });
+        }
+        
+        let userLoggedIn = getCookie("userLoggedIn");
+            if(userLoggedIn) {
+            $("#button").hide();
+            $("#button2").show();
+            }
+            else
+            {
+            $("#button").show();
+            $("#button2").hide();
+            }
+
+        $("#button").click(function() {
+
+            if(getCookie("userSet") == "true") {
+                alert("Only one time signing allowed per day.");
+            }
+            else if($("#emailInput").val() == "") {
+                alert("Please enter your email to sign in");
+            }
+
+            else{    
+                setCookie("userLoggedIn", "true");
+                setCookie("userEmail",$("#emailInput").val());
+                setCookie("userSet", "true");
+                updateDatabase($("#emailInput").val(),"Sign-In");
+                $("#button").hide();
+                $("#button2").show();
+                alert("Signed In successfully");
+            }
+
+            });
+
+        // Sign Off -> remove cookie and switch buttons
+        $("#button2").click(function() {
+
+            checkValidEmail = getCookie("userEmail");
+            if($("#emailInput").val() == "") {
+                alert("Please enter your email to sign off");
+            }
+            else if(checkValidEmail==$("#emailInput").val() ) {
+                deleteCookie("userLoggedIn");
+                deleteCookie("userEmail");
+                updateDatabase($("#emailInput").val(),"Sign-Off");
+                alert("Signed off successfully");
+                $("#button2").hide();
+                $("#button").show();
+            }
+            else {
+                alert("Please use your email only to sign off.");
+            }
+            
+
+            
+            
         });
     });
 

@@ -1,15 +1,15 @@
 {
-  "name": "chat-application-final",
+  "name": "SarasCare-AMS",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for Saras Care AMS",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "node-sass": "sass --watch public/css/index.scss public/css/index.css --style compressed"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["SarasCare", "AMS", "Backend"],
+  "author": "Github@hr097",
   "license": "ISC",
   "dependencies": {
     "bad-words": "^3.0.4",
