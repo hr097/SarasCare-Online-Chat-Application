@@ -5,8 +5,16 @@ const http = require('http');
 
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+// const fs = require("fs");
+const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLD_NAME,   // from dashboard
+  api_key: process.env.CLD_API_KEY,         // from dashboard
+  api_secret: process.env.CLD_API_SECRET_KEY,   // from dashboard
+});
 //const router = express.Router();
 
 const socket = require("socket.io");
@@ -26,10 +34,10 @@ async function connectDB() {
   await client.connect();
   db = client.db("SarasCare"); // your DB name
   if(!db) {
-    console.error("❌ MongoDB connection failed");
+    console.error("MongoDB connection failed❌ !");
     return;
   }
-  console.log("✅ MongoDB connected");
+  console.log("MongoDB connected ✅!");
 }
 
 
@@ -151,32 +159,37 @@ app.post("/api/updatedb", async (req, res) => {
 });
 
 // Directory to save uploaded images
-const uploadDir = path.join(__dirname, "imgs_uploads"); // inside src folder
-if (!fs.existsSync(uploadDir))
-{fs.mkdirSync(uploadDir, { recursive: true });}
+// const uploadDir = path.join(__dirname, "imgs_uploads"); // inside src folder
+// if (!fs.existsSync(uploadDir))
+// {fs.mkdirSync(uploadDir, { recursive: true });}
 
 // Configure multer storage
 // Basic storage first
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    // temporary name
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => cb(null, uploadDir),
+//   filename: (req, file, cb) => {
+//     // temporary name
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   }
+// });
 
-const upload = multer({ storage });
+
+const upload = multer();
 
 // POST endpoint to save image
 app.post("/user-verification", upload.single("photo"), (req, res) => {
  
-    if (!req.file) 
-      {return res.status(400).json({ error: "No file uploaded" });}
+  if (!req.file) 
+  {return res.status(400).json({ error: "No file uploaded" });}
  
+  const buffer = req.file.buffer;
+
   console.log("Email:", req.body.email);
   console.log("Action:", req.body.action);
   console.log("Datetime:", req.body.datetime);
-  console.log("File saved at:", req.file.path);
+  // console.log("File saved at:", req.file.path);
+
+ 
 
 
   const { email, action, datetime } = req.body;
@@ -184,16 +197,28 @@ app.post("/user-verification", upload.single("photo"), (req, res) => {
   const safeEmail = (email || "unknown").replace(/[@.]/g, "-");
   const finalName = `${safeEmail}_${action || "unknown"}_${datetime || Date.now()}${ext}`;
 
-  // Rename file
-  const oldPath = req.file.path;
-  const newPath = path.join(uploadDir, finalName);
-  fs.renameSync(oldPath, newPath);
+  console.log("Final file name:", finalName);
 
-  console.log("File saved renamed as:", finalName);
+    let cld_upload_stream = cloudinary.uploader.upload_stream(
+    { folder: 'users_attendance_uploads', public_id: finalName },
+   (error, result) => {
+      if (error){ return res.status(500).json({ error: error.message });}
+      else{res.json({ message: 'Uploaded successfully', url: result.secure_url });}
+    });
+  
+    streamifier.createReadStream(buffer).pipe(cld_upload_stream);
+    
+
+  // Rename file
+  // const oldPath = req.file.path;
+  // const newPath = path.join(uploadDir, finalName);
+  // fs.renameSync(oldPath, newPath);
+
+  // console.log("File saved renamed as:", finalName);
 
   // Optional: update MongoDB here using req.file.path if needed
 
-  res.json({ success: true, file: req.file.path });
+  //res.json({ success: true, file: req.file.path });
 });
 
 server.listen(port,(err) => {

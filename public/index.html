@@ -106,142 +106,10 @@
     <script type="text/javascript">
         
     $(function() {
-$(function() {
-    async function requestWebcam() {
-        try {
-            // 1. Request webcam once
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const video = document.getElementById("webcam");
-            const canvas = document.getElementById("snapshot");
-            const captureBtn = document.getElementById("button");
-            const captureBtn2 = document.getElementById("button2");
 
-            video.srcObject = stream;
-            video.play();
+    $(function() {
 
-
-            function video_input(sx)
-            {
-                const context = canvas.getContext("2d");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const datetime = new Date();
-                const formattedDate = datetime.toString().replace(/[:.]/g, "-");
-
-                const now = new Date();
-
-                const options = {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true // Ensures 12-hour format with AM/PM
-                };
-
-                // Use 'en-GB' locale for dd/mm/yyyy date format and 12-hour time
-                const fmt = new Intl.DateTimeFormat('en-GB', options).format(now).toString().replace(/[/.,]/g, "-");
-
-                console.log(fmt);
-                console.log("Formatted Date:", formattedDate);
-
-
-                const email = $("#emailInput").val();
-
-                // Define action here, e.g., 'sign-in' or 'sign-off'
-                const action = $("#actionInput").val() || sx;
-
-                // const fileName = `${email}_${action}_${fmt}.png`;
-
-                const formData = new FormData();
-                formData.append("photo", canvas.toBlob((blob) => {
-                    formData.append("photo", blob);
-                    
-                    formData.append("email", email);
-                    formData.append("action", action);
-                    formData.append("datetime", fmt);
-
-                    // Send to backend
-                    fetch("/user-verification", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(data => {})
-                    .catch(err => console.error(err));
-
-                }, "image/png"));
-            }
-
-            // 2. Capture snapshot on button click
-            captureBtn.addEventListener("click", () => {
-                video_input("Sign-In");
-            });
-            captureBtn2.addEventListener("click", () => {
-                video_input("Sign-Off");
-            });
-
-        } catch (err) {
-            if (err.name === "NotAllowedError") {
-                alert("Webcam access denied. Please enable it in browser settings.");
-            } else if (err.name === "NotFoundError") {
-                alert("No webcam found on this device.");
-            } else {
-                console.error("Error accessing webcam:", err);
-                alert("Cannot access webcam: " + err.message);
-            }
-        }
-    }
-
-    requestWebcam();
-});
-
-  
-    // Get cookie
-    function getCookie(name) {
-    let cookieArr = document.cookie.split(";");
-    for (let i = 0; i < cookieArr.length; i++) {
-        let cookiePair = cookieArr[i].trim().split("=");
-        if (cookiePair[0] === name) {
-        return decodeURIComponent(cookiePair[1]);
-        }
-    }
-    return null;
-    }
-
-    // Set cookie
-    function setCookie(name, value) {
-    let date = new Date();
-    date.setTime(date.getTime() + (3600000));
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/`;
-    }
-
-    // Delete cookie
-    function deleteCookie(name) {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-    }
-
-    
-// Get formatted date-time string (dd-mm-yyyy HH:MM AM/PM)
-function getFormattedDateTime() {
-  const now = new Date();
-
-  let dd = String(now.getDate()).padStart(2, "0");
-  let mm = String(now.getMonth() + 1).padStart(2, "0");
-  let yyyy = now.getFullYear();
-
-  let hours = now.getHours();
-  let minutes = String(now.getMinutes()).padStart(2, "0");
-  let ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-
-  const time = `${hours}:${minutes} ${ampm}`;
-  return `${dd}-${mm}-${yyyy} ${time}`;
-}
-
-      // Example: this would come from your database/API
+        // Example: this would come from your database/API
       let emails = [
       ];
         (async function loadUsers() {
@@ -330,7 +198,27 @@ function getFormattedDateTime() {
         });
 
 
-        function updateDatabase(email,action_x)
+       
+
+        // $("#button").click(function() {
+
+
+        //     });
+
+        // Sign Off -> remove cookie and switch buttons
+        // $("#button2").click(function() {
+
+            
+            
+
+            
+            
+        // });
+    });
+
+    async function requestWebcam() {
+
+         function updateDatabase(email,action_x)
         {
             const datetime = getFormattedDateTime();
 
@@ -361,10 +249,92 @@ function getFormattedDateTime() {
             {
             $("#button").show();
             $("#button2").hide();
+        }
+
+        try {
+            // 1. Request webcam once
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById("webcam");
+            const canvas = document.getElementById("snapshot");
+            const captureBtn = document.getElementById("button");
+            const captureBtn2 = document.getElementById("button2");
+
+            video.srcObject = stream;
+            video.play();
+
+
+            function video_input(sx)
+            {
+                const context = canvas.getContext("2d");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const datetime = new Date();
+                const formattedDate = datetime.toString().replace(/[:.]/g, "-");
+
+                const now = new Date();
+
+                const options = {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true // Ensures 12-hour format with AM/PM
+                };
+
+                // Use 'en-GB' locale for dd/mm/yyyy date format and 12-hour time
+                const fmt = new Intl.DateTimeFormat('en-GB', options).format(now).toString().replace(/[/.,]/g, "-");
+
+                // console.log(fmt);
+                // console.log("Formatted Date:", formattedDate);
+
+
+                const email = $("#emailInput").val();
+
+                // Define action here, e.g., 'sign-in' or 'sign-off'
+                const action = $("#actionInput").val() || sx;
+
+                // const fileName = `${email}_${action}_${fmt}.png`;
+
+                const formData = new FormData();
+                formData.append("photo", canvas.toBlob((blob) => {
+                    formData.append("photo", blob);
+                    
+                    formData.append("email", email);
+                    formData.append("action", action);
+                    formData.append("datetime", fmt);
+
+                    // Send to backend
+                    fetch("/user-verification", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {console.log("API response:", data);
+                        if (data.error) {
+                            alert("Error: " + data.error);
+                        } else {
+
+                            if( action === "Sign-In") 
+                             {   
+                             alert("Signed In successfully!");
+                             }
+                             else
+                             {
+                                alert("Signed Off successfully!");
+                             }
+                        }
+                    })
+                    .catch(err => console.error(err));
+
+                }, "image/png"));
             }
 
-        $("#button").click(function() {
-
+            // 2. Capture snapshot on button click
+            captureBtn.addEventListener("click", () => {
+               
             if(getCookie("userSet") == "true") {
                 alert("Only one time signing allowed per day.");
             }
@@ -379,15 +349,11 @@ function getFormattedDateTime() {
                 updateDatabase($("#emailInput").val(),"Sign-In");
                 $("#button").hide();
                 $("#button2").show();
-                alert("Signed In successfully");
+                video_input("Sign-In");
             }
-
             });
-
-        // Sign Off -> remove cookie and switch buttons
-        $("#button2").click(function() {
-
-            checkValidEmail = getCookie("userEmail");
+            captureBtn2.addEventListener("click", () => {
+                checkValidEmail = getCookie("userEmail");
             if($("#emailInput").val() == "") {
                 alert("Please enter your email to sign off");
             }
@@ -395,19 +361,76 @@ function getFormattedDateTime() {
                 deleteCookie("userLoggedIn");
                 deleteCookie("userEmail");
                 updateDatabase($("#emailInput").val(),"Sign-Off");
-                alert("Signed off successfully");
                 $("#button2").hide();
                 $("#button").show();
+                video_input("Sign-Off");
+                
             }
             else {
                 alert("Please use your email only to sign off.");
             }
-            
+               
+            });
 
-            
-            
-        });
-    });
+        } catch (err) {
+            if (err.name === "NotAllowedError") {
+                alert("Webcam access denied. Please enable it in browser settings.");
+            } else if (err.name === "NotFoundError") {
+                alert("No webcam found on this device.");
+            } else {
+                console.error("Error accessing webcam:", err);
+                alert("Cannot access webcam: " + err.message);
+            }
+        }
+    }
+
+    requestWebcam();
+});
+
+  
+    // Get cookie
+    function getCookie(name) {
+    let cookieArr = document.cookie.split(";");
+    for (let i = 0; i < cookieArr.length; i++) {
+        let cookiePair = cookieArr[i].trim().split("=");
+        if (cookiePair[0] === name) {
+        return decodeURIComponent(cookiePair[1]);
+        }
+    }
+    return null;
+    }
+
+    // Set cookie
+    function setCookie(name, value) {
+    let date = new Date();
+    date.setTime(date.getTime() + (3600000));
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/`;
+    }
+
+    // Delete cookie
+    function deleteCookie(name) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    }
+
+    
+// Get formatted date-time string (dd-mm-yyyy HH:MM AM/PM)
+function getFormattedDateTime() {
+  const now = new Date();
+
+  let dd = String(now.getDate()).padStart(2, "0");
+  let mm = String(now.getMonth() + 1).padStart(2, "0");
+  let yyyy = now.getFullYear();
+
+  let hours = now.getHours();
+  let minutes = String(now.getMinutes()).padStart(2, "0");
+  let ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+
+  const time = `${hours}:${minutes} ${ampm}`;
+  return `${dd}-${mm}-${yyyy} ${time}`;
+}
+
+  
 
     </script>
 </body>
