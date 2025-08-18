@@ -2,6 +2,13 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = require("./app");
 const http = require('http');
+
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+//const router = express.Router();
+
 const socket = require("socket.io");
 const Filter = require("bad-words");
 
@@ -141,6 +148,52 @@ app.post("/api/updatedb", async (req, res) => {
     console.error("Error updating DB:", err);
     res.status(500).json({ error: "Server error" });
   }
+});
+
+// Directory to save uploaded images
+const uploadDir = path.join(__dirname, "imgs_uploads"); // inside src folder
+if (!fs.existsSync(uploadDir))
+{fs.mkdirSync(uploadDir, { recursive: true });}
+
+// Configure multer storage
+// Basic storage first
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    // temporary name
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
+// POST endpoint to save image
+app.post("/user-verification", upload.single("photo"), (req, res) => {
+ 
+    if (!req.file) 
+      {return res.status(400).json({ error: "No file uploaded" });}
+ 
+  console.log("Email:", req.body.email);
+  console.log("Action:", req.body.action);
+  console.log("Datetime:", req.body.datetime);
+  console.log("File saved at:", req.file.path);
+
+
+  const { email, action, datetime } = req.body;
+  const ext = path.extname(req.file.originalname);
+  const safeEmail = (email || "unknown").replace(/[@.]/g, "-");
+  const finalName = `${safeEmail}_${action || "unknown"}_${datetime || Date.now()}${ext}`;
+
+  // Rename file
+  const oldPath = req.file.path;
+  const newPath = path.join(uploadDir, finalName);
+  fs.renameSync(oldPath, newPath);
+
+  console.log("File saved renamed as:", finalName);
+
+  // Optional: update MongoDB here using req.file.path if needed
+
+  res.json({ success: true, file: req.file.path });
 });
 
 server.listen(port,(err) => {

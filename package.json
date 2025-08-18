@@ -8,7 +8,11 @@
     "dev": "nodemon src/index.js",
     "node-sass": "sass --watch public/css/index.scss public/css/index.css --style compressed"
   },
-  "keywords": ["SarasCare", "AMS", "Backend"],
+  "keywords": [
+    "SarasCare",
+    "AMS",
+    "Backend"
+  ],
   "author": "Github@hr097",
   "license": "ISC",
   "dependencies": {
@@ -16,6 +20,7 @@
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "mongodb": "^6.18.0",
+    "multer": "^2.0.2",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
