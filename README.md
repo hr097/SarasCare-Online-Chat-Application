@@ -14,7 +14,7 @@
     A Online Attendance Management App for SarasCare Melbourne Diwali EventProject Group
     <br />
   </p>
-  <a href="https://real-time-chat-balar.herokuapp.com/">View Demo</a>
+  <a href="https://sarascare-ams.onrender.com/">View Demo</a>
 </div>
 
 
